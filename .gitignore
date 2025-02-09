@@ -1,0 +1,10 @@
+*.o
+*.pyc
+*.a
+*.so
+build/
+arduino/dist/
+*.egg
+*.egg-info
+.remote-sync.json
+.idea
