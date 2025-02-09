@@ -166,7 +166,7 @@ def test2():
 
 module_manager = ModuleManager()
 module_manager.register(ClockModule(), 4, 1)
-scroll_text_module = ScrollTextModule('Non a Mario Jumbomerde')
+scroll_text_module = ScrollTextModule('Test screen')
 module_manager.register(scroll_text_module, 0, 9)
 # module_manager.register(TemperatureModule(), 4, 9)
 
