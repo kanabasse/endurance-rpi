@@ -2,8 +2,7 @@ import glob
 import time
 from threading import Thread, Lock
 
-from fonts import font_clock
-from modules.moduleinterface import ModuleInterface
+from src.python.modules.moduleinterface import ModuleInterface
 
 
 class TemperatureReader(Thread):

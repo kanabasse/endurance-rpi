@@ -160,7 +160,7 @@ def test1():
 
 
 def test2():
-    ht1632c.putstr(0,0,"1234", font_clock, 0, 0)
+    ht1632c.putstr(0, 0,"1234", font_clock, 0, 0)
     ht1632c.print()
 
 

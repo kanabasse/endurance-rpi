@@ -6,7 +6,7 @@ SCHEMA="main/main.ino"
 INTERFACE="/dev/ttyACM0"
 
 pushd .
-cd arduino
+cd src/arduino
 
 rm -rf dist/ht1632c.zip
 zip -r9 dist/ht1632c.zip endurance-arduino

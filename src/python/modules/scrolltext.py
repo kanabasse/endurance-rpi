@@ -1,5 +1,5 @@
-from fonts import font_6x8
-from modules.moduleinterface import ModuleInterface
+from src.python.fonts import font_6x8
+from src.python.modules.moduleinterface import ModuleInterface
 
 class ScrollTextModule(ModuleInterface):
     X_OFFSET = 4

@@ -3,7 +3,7 @@
 *.a
 *.so
 build/
-arduino/dist/
+src/arduino/dist/
 *.egg
 *.egg-info
 .remote-sync.json

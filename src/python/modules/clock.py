@@ -2,9 +2,9 @@ import datetime
 import time
 
 from threading import Thread, Lock
-from modules.moduleinterface import ModuleInterface
+from src.python.modules.moduleinterface import ModuleInterface
 
-from fonts import font_clock
+from src.python.fonts import font_clock
 
 
 class TimeReader(Thread):
