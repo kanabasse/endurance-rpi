@@ -8,8 +8,15 @@ Connect to the Arduino via USB (UART wasn't tested).
 
 ## Prerequisites
 
-- `arduino-cli`: install the Arduino IDE from your package manager  
-- `pyserial`: `sudo pip install pyserial` or get it from your package manager
+### arduino-cli
+ Run the following command to install arduino-cli in `src/arduino`:
+```bash
+$ curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=src/arduino sh
+```
+**Note:** `setup-arduino.sh` uses find `src/arduino/arduino-cli`
+
+### pyserial
+Install manually: `sudo pip install pyserial` or get it from your package manager
 
 ## Usage
 
@@ -18,7 +25,7 @@ Connect to the Arduino via USB (UART wasn't tested).
 1. Connect the Arduino board through USB.
 2. Run `./setup-arduino.sh` to install the library to the Arduino IDE, compile and upload the code.  
 __Note:__ Change the INTERFACE to your arduino's tty. Default is **/dev/ttyACM0**
-3. 
+ 
 ### Raspberry
 
 In the code, choose which modules to run:

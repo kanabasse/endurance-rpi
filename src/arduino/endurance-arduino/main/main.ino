@@ -2,9 +2,17 @@
 
 ht1632c ledMatrix = ht1632c(&PORTD, 7, 6, 4, 5, GEOM_32x16, 2);
 
-const int BUFFER_SIZE = 64;
-uint8_t buffer[BUFFER_SIZE];
+const int SCREEN_SIZE = 64;
 int receivedBytes = 0;
+
+struct Packet {
+    uint8_t COLOR;
+    uint8_t DATA[SCREEN_SIZE];
+    bool PRINT;
+};
+
+uint8_t buffer[sizeof(struct Packet)];
+
 
 void setup() {
     ledMatrix.clear(); // Clean screen
@@ -17,23 +25,34 @@ void setup() {
 }
 
 void loop() {
-    while (Serial.available() > 0) {
-        buffer[receivedBytes] = Serial.read();
-        receivedBytes++;
-        if (receivedBytes >= BUFFER_SIZE) {
-            print_screen();
-            receivedBytes = 0; // Reset for next transmission
-        }
+    if (read_data() == 0) {
+        struct Packet packet;
+        parse_packet(&packet);
+        print_screen(&packet);
     }
 }
 
-void print_screen() {
-//     for (int i = 0; i < BUFFER_SIZE; i++) {
-//         Serial.print(buffer[i]);
-//     }
-//     Serial.println(BUFFER_SIZE);
-//     Serial.println();
+/*
+    Read data from serial and input it in buffer[]
+    Return 0 if data is ready to be parsed, else return 1
+*/
+int read_data() {
+    while (Serial.available() > 0) {
+        buffer[receivedBytes] = Serial.read();
+        receivedBytes++;
+        if (receivedBytes >= sizeof(struct Packet)) {
+            receivedBytes = 0; // Reset for next transmission
+            return 0;
+        }
+    }
+    return 1;
+}
 
-    ledMatrix.set_screen(buffer, GREEN);
+uint8_t parse_packet(struct Packet *packet) {
+    memcpy(packet, buffer, sizeof(struct Packet));
+}
+
+void print_screen(struct Packet *packet) {
+    ledMatrix.set_screen(packet->DATA, packet->COLOR);
     ledMatrix.sendframe();
 }
