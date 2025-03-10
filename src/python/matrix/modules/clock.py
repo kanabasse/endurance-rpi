@@ -2,9 +2,9 @@ import datetime
 import time
 
 from threading import Thread, Lock
-from src.python.modules.moduleinterface import ModuleInterface
+from matrix.modules.module_interface import ModuleInterface
 
-from src.python.fonts import font_clock
+from fonts import font_clock
 
 
 class TimeReader(Thread):
@@ -27,15 +27,15 @@ class TimeReader(Thread):
 
         return cached_time
 
+
 class ClockModule(ModuleInterface):
     SPACING = 1
     time_reader = TimeReader()
 
-    def init(self, screen):
+    def init_screen(self, screen):
         self.time_reader.start()
-        print(f"Initialized module {self.__class__.__name__}...")
 
-    def update(self, screen, pos_x, pos_y):
+    def update_screen(self, screen, pos_x, pos_y):
         now = datetime.datetime.now()
         hour = str(now.hour).zfill(2)
         minute = str(now.minute).zfill(2)

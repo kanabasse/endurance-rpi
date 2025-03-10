@@ -14,16 +14,3 @@ def split_uint16(value):
     low_byte = value & 0xFF        # Extract lower 8 bits (Least Significant Byte)
     high_byte = (value >> 8) & 0xFF  # Extract upper 8 bits (Most Significant Byte)
     return low_byte, high_byte
-
-def rainbow():
-    while True:
-        # GREEN
-        yield 1
-        yield 1
-        # RED
-        yield 2
-        yield 2
-        # ORANGE
-        yield 3
-        yield 3
-rainbow = rainbow()

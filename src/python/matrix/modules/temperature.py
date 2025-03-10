@@ -2,7 +2,7 @@ import glob
 import time
 from threading import Thread, Lock
 
-from src.python.modules.moduleinterface import ModuleInterface
+from matrix.modules.module_interface import ModuleInterface
 
 
 class TemperatureReader(Thread):
@@ -56,10 +56,10 @@ class TemperatureModule(ModuleInterface):
     SPACING = 1
     temperature_reader = TemperatureReader()
 
-    def init(self, screen):
+    def init_screen(self, screen):
         self.temperature_reader.start()
         print(f"Initialized module {self.__class__.__name__}...")
 
-    def update(self, screen, pos_x, pos_y):
+    def update_screen(self, screen, pos_x, pos_y):
         screen.putstr(pos_x, pos_y, str(round(self.temperature_reader.get_temperature(), 1)) + 'c',
                       screen.font5x8, screen.GREEN, screen.BLACK)

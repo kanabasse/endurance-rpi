@@ -6,9 +6,9 @@ const int SCREEN_SIZE = 64;
 int receivedBytes = 0;
 
 struct Packet {
-    uint8_t COLOR;
-    uint8_t DATA[SCREEN_SIZE];
-    bool PRINT;
+    uint8_t SCREEN_GREEN[SCREEN_SIZE];
+    uint8_t SCREEN_RED[SCREEN_SIZE];
+    uint8_t SCREEN_ORANGE[SCREEN_SIZE];
 };
 
 uint8_t buffer[sizeof(struct Packet)];
@@ -53,6 +53,8 @@ uint8_t parse_packet(struct Packet *packet) {
 }
 
 void print_screen(struct Packet *packet) {
-    ledMatrix.set_screen(packet->DATA, packet->COLOR);
+    ledMatrix.init_screen(packet->SCREEN_GREEN, GREEN, true);
+    ledMatrix.init_screen(packet->SCREEN_RED, RED, false);
+    ledMatrix.init_screen(packet->SCREEN_ORANGE, ORANGE, false);
     ledMatrix.sendframe();
 }

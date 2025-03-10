@@ -1,0 +1,26 @@
+{% extends 'index.html' %}
+{% block title %}Configure Alarms{% endblock %}
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<main class="responsive">
+  <article class="round">
+    <h5>Alarms</h5>
+     <section id="alarm_list"></section>
+     <nav class="right-align">
+      <button class="border square round" onclick="createAlarm()"><i>add</i></button>
+    </nav>
+  </article>
+</main>
+<div id="alarm-saved" class="snackbar">Alarme enregistrée</div>
+<div id="alarm-created" class="snackbar">Alarme crée</div>
+<div id="alarm-deleted" class="snackbar">Alarme supprimée</div>
+<div id="alarm-enabled" class="snackbar">Alarme activée</div>
+<div id="alarm-disabled" class="snackbar">Alarme désactivée</div>
+
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="{{ url_for('static', filename='alarm.js') }}"></script>
+{% endblock %}

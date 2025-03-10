@@ -15,8 +15,17 @@ $ curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/instal
 ```
 **Note:** `setup-arduino.sh` uses find `src/arduino/arduino-cli`
 
+### Python dependecies
+
+```bash
+$ pip install -r requirements.txt
+```
+
 ### pyserial
 Install manually: `sudo pip install pyserial` or get it from your package manager
+
+### flask
+Install manually: `sudo pip install flask` or get it from your package manager
 
 ## Usage
 
@@ -38,8 +47,8 @@ For example, the below code enables the ClockModule:
 ...
 module_manager = ModuleManager()
 
-# Display the module at coordinates: x= 4, y=1 
-module_manager.register(ClockModule(), 4, 1) 
+# Display the module at coordinates: x= 4, y=1, priority=0
+module_manager.register(ClockModule(), 4, 1, 0) 
 ...
 ```
 

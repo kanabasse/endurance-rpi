@@ -175,7 +175,7 @@ public:
     void fill(uint8_t x, uint8_t y, uint8_t color);
     void bezier(int x0, int y0, int x1, int y1, int x2, int y2, uint8_t color);
     void profile();
-    void set_screen(uint8_t *data, uint8_t color);
+    void set_screen(uint8_t *data, uint8_t color, bool reset);
 #ifdef PRINT_NEW
     virtual size_t write(uint8_t chr);
     virtual size_t write(const char *str);

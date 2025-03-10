@@ -1,54 +1,75 @@
-from fonts import font_clock
+import threading
+from datetime import datetime
+
+from flask import Flask, render_template, request, jsonify
+
+from matrix.main import Matrix
+from matrix.modules.alarm import AlarmModule, ScrollTextModule
+
+matrix = Matrix()
+matrix_thread = threading.Thread(target=matrix.run_update_loop, daemon=True)
+matrix_thread.start()
+
+app = Flask(__name__)
+
+@app.route('/')
+def render_index():
+  return render_template('alarm.html')
+
+@app.route('/alarms')
+def render_alarm():
+  return render_template('alarm.html')
+
+@app.route('/api/alarms', methods=['POST'])
+def save_alarm():
+  for alarm in request.json:
+    set_alarm(matrix, alarm)
+  return jsonify({"message": "Alarm saved successfully"})
+
+def set_alarm(matrix, data):
+  time = datetime.strptime(f'{data["date"]} {data["time"]}', '%Y-%m-%d %H:%M')
+  alarm_module = AlarmModule(data['label'], time)
+  matrix.register(alarm_module, 0, 8, 2)
+
+@app.route('/api/alarms/<id>', methods=['PATCH'])
+def update_alarm(id):
+  alarm_module = matrix.get_module(id)
+  if alarm_module is None:
+    return jsonify({"message": "Alarm not found"})
+
+  data = request.json
+  alarm_module.date = datetime.strptime(f'{data["date"]} {data["time"]}', '%Y-%m-%d %H:%M')
+  alarm_module.set_text(data['label'])
+  return jsonify({"message": "Alarm updated successfully"})
+#
+@app.route('/api/alarms/<id>/enable', methods=['POST'])
+def enable_alarm(id):
+  alarm_module = matrix.get_module(id)
+  if alarm_module is None:
+    return jsonify({"message": "Alarm not found"})
+
+  data = request.json
+  alarm_module.enabled = data['enabled']
+  return jsonify({"message": "Alarm updated successfully"})
 
 
-from modules.clock import ClockModule
-from modules.manager import ModuleManager
-from modules.scrolltext import ScrollTextModule
-from src.python.ht1662c.ht1632c import HT1632C
+@app.route('/api/alarms', methods=['GET'])
+def get_alarms():
+  alarms = matrix.get_modules_by_class(AlarmModule.__name__)
+  json_alarms = []
+  for alarm in alarms:
+    json_alarms.append({
+      "id": alarm.id,
+      "date": alarm.date.strftime("%Y-%m-%d"),
+      "time": alarm.date.strftime("%H:%M"),
+      "label": alarm.text,
+      "enabled": alarm.enabled
+    })
+  return jsonify({"alarms": json_alarms})
 
-
-def test1():
-    new_array = bytearray([0xFF] * 16) + bytearray([0x00] * 16) + bytearray(
-        [0x00] * 16) + bytearray([0x00] * 16)
-    ht1632c.add_to_screen(new_array)
-    ht1632c.print()
-
-    new_array = bytearray([0x00] * 16) + bytearray([0xFF] * 16) + bytearray(
-        [0x00] * 16) + bytearray([0x00] * 16)
-    ht1632c.add_to_screen(new_array)
-    ht1632c.print()
-
-    new_array = bytearray([0x00] * 16) + bytearray([0x00] * 16) + bytearray(
-        [0xFF] * 16) + bytearray([0x00] * 16)
-    ht1632c.add_to_screen(new_array)
-    ht1632c.print()
-
-    new_array = bytearray([0x00] * 16) + bytearray([0x00] * 16) + bytearray(
-        [0x00] * 16) + bytearray([0xFF] * 16)
-    ht1632c.add_to_screen(new_array)
-    ht1632c.print()
-
-    new_array = bytearray([0x00] * 64)
-    ht1632c.set_to_screen(new_array)
-    ht1632c.print()
-
-
-def test2():
-    ht1632c.putstr(0, 0,"1234", font_clock, 0, 0)
-    ht1632c.print()
-
-
-module_manager = ModuleManager()
-module_manager.register(ClockModule(), 4, 1)
-scroll_text_module = ScrollTextModule('Test screen')
-module_manager.register(scroll_text_module, 0, 9)
-# module_manager.register(TemperatureModule(), 4, 9)
-
-ht1632c = HT1632C()
-module_manager.init_modules(ht1632c)
-while True:
-    module_manager.update(ht1632c)
-    ht1632c.print()
-
-    # test1()
-    # test2()
+@app.route('/api/alarms/<id>', methods=['DELETE'])
+def delete_alarm(id):
+  if matrix.remove_module(id):
+    return jsonify({"message": "Success"}), 200
+  else:
+    return jsonify({"message": "Alarm not found"}), 404

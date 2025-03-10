@@ -4,10 +4,7 @@ import time
 
 import serial
 
-from src.python.ht1662c.utils import reverse_byte, split_uint16, rainbow
-
-LOG = logging.getLogger(__name__)
-
+from matrix.ht1662c.utils import reverse_byte, split_uint16
 
 class HT1632C:
     BLACK = 0
@@ -21,34 +18,43 @@ class HT1632C:
     ARRAY_SIZE = 64
 
     def __init__(self):
-        self.screen_buffer = bytearray([0x00] * self.ARRAY_SIZE)
+        self.screen_buffer = {
+            self.GREEN: bytearray([0x00] * self.ARRAY_SIZE),
+            self.RED: bytearray([0x00] * self.ARRAY_SIZE),
+            self.ORANGE: bytearray([0x00] * self.ARRAY_SIZE)
+        }
         self.arduino = serial.Serial(self.SERIAL_PORT, self.BAUD_RATE, timeout=1)
-        pass
+        self.logger = logging.getLogger("ht1632c")
 
     def putraw(self, x, y, data, color, bg):
+        cached_data = data if color != self.BLACK else [0xFF] * len(data)
+
         half_array = self.ARRAY_SIZE // 2
-        for i, col in enumerate(data[:half_array]):
+        for i, col in enumerate(cached_data[:half_array]):
             index = x +  i
-            if index > self.ARRAY_SIZE/2:
+            if index >= self.ARRAY_SIZE/2:
                 break
 
-            shifted_data = reverse_byte(data[i]) << y
+            shifted_data = reverse_byte(cached_data[i]) << y
             low_bytes, up_bytes = split_uint16(shifted_data)
-            if index < self.ARRAY_SIZE and y < 8:
-                self.screen_buffer[x + i] = low_bytes
-            if index < self.ARRAY_SIZE/2:
-                self.screen_buffer[self.ARRAY_SIZE//2 + x + i] = up_bytes
-
-        # self.debug_screen()
+            if color == self.BLACK:
+                for key in self.screen_buffer.keys():
+                    self.screen_buffer[key][index + self.ARRAY_SIZE//2] &= ~up_bytes
+                    if y < 8: self.screen_buffer[color][index] &= ~low_bytes
+            else:
+                self.screen_buffer[color][index + self.ARRAY_SIZE//2] = up_bytes
+                if y < 8: self.screen_buffer[color][index] = low_bytes
 
     def putchar(self, x, y, c, font, color, bg):
+        """Plot a char c at (x,y) using font"""
         char = font.get(c)
         if c is None:
-            LOG.warning("character '%s' not found in font bitmap", c)
+            self.logger.warning("character '%s' not found in font bitmap", c)
             return
         self.putraw(x, y, char, color, bg)
 
     def putstr(self, x, y, s, font, color, bg):
+        """Plot a string s at (x,y) using font"""
         x_offset = x
         for index, char in enumerate(s):
             char_width = self.charwidth(char, font)
@@ -57,39 +63,37 @@ class HT1632C:
         return self.strwidth(s, font)
 
     def charwidth(self, c, font):
+        """Return the length of the char c in pixels using font"""
         width = 0
         char_bitmap = font.get(c)
         if char_bitmap is None:
-            LOG.warning("character '%s' not found in font bitmap", c)
+            self.logger.warning("character '%s' not found in font bitmap", c)
             return width
         return len(char_bitmap)
 
     def strwidth(self, s, font):
+        """Return the width of the string s in pixels using font"""
         width = 0
         for index, char in enumerate(s):
             char_width = self.charwidth(char, font)
             width += char_width + (1 if index != (len(s) - 1) else 0)
         return width
 
-    def add_to_screen(self, data):
-        for i, byte in enumerate(data):
-            self.screen_buffer[i] = self.screen_buffer[i] or byte
-
-    def set_to_screen(self, data):
-        self.screen_buffer = data
-
     def print(self):
-        # color = random.randint(1,3)
-        to_send = struct.pack('B64B?', next(rainbow), *self.screen_buffer, True)
-
+        """Send the screen buffers to the arduino"""
+        to_send = struct.pack('64B64B64B',
+                              *self.screen_buffer[self.GREEN],
+                              *self.screen_buffer[self.RED],
+                              *self.screen_buffer[self.ORANGE])
         self.arduino.write(to_send)
-        print(f"Sent {len(to_send)} bytes to {self.SERIAL_PORT}")
+        self.logger.debug(f"Sent {len(to_send)} bytes to {self.SERIAL_PORT}")
 
-        # Give some time to process
+        # Give some time for the arduino to process
         time.sleep(0.1)
 
     def debug_screen(self):
         """
+        NOT WORKING -- Require to properly merge the RED,GREEN,ORANGE screen buffers
         Plots a 32x16 binary image onto the screen buffer.
 
         :param screen: bytearray representing the 32x16 screen (512 bytes).

@@ -340,7 +340,7 @@ inline void ht1632c::_update_fb(uint8_t *ptr, uint8_t target, uint8_t pixel)
 
 /* put a single pixel in the coordinates x, y */
 
-void ht1632c::plot (uint8_t x, uint8_t y, uint8_t color)
+void ht1632c::plot(uint8_t x, uint8_t y, uint8_t color)
 {
   uint8_t val, csm;
   uint8_t addr;
@@ -887,7 +887,7 @@ void ht1632c::profile() {
   }
 }
 
-void ht1632c::set_screen(uint8_t *data, uint8_t color) {
+void ht1632c::set_screen(uint8_t *data, uint8_t color, bool reset) {
     // First 32 * 8
     for (uint8_t col = 0; col < 32; col++) {
         uint8_t value = data[col];
@@ -896,7 +896,7 @@ void ht1632c::set_screen(uint8_t *data, uint8_t color) {
             if (bit == 1) {
                 plot(col, row, color);
             }
-            if (bit == 0) {
+            if (bit == 0 && reset) {
                 plot(col, row, 0);
             }
         }
@@ -909,7 +909,7 @@ void ht1632c::set_screen(uint8_t *data, uint8_t color) {
             if (bit == 1) {
                 plot(col, 8 + row, color);
             }
-            if (bit == 0) {
+            if (bit == 0 && reset) {
                 plot(col, 8 + row, 0);
             }
         }
